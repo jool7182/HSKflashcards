@@ -1,10 +1,3 @@
-#option for vocabulary/pinyin
-#Option to select multiple groups of flash cards
-#Keep track of most missed words
-#Track the accuracy percentage of each word
-#Fix the I don't understand to re=ask y/n
-
-
 import random
 import datetime
 import json
@@ -19,29 +12,74 @@ hsk_choice = input('which test would you like to study? >')
 selected_data = read_data[hsk_choice][0]
 
 #Opening the accuracy file
-with open('C:\\Users\\Joshua\\Desktop\\pyscripts\\flash_cards\\results\\hsk1_accuracy.json', 'r') as f1:
+with open(f'C:\\Users\\Joshua\\Desktop\\pyscripts\\flash_cards\\results\\{hsk_choice}_accuracy.json', 'r') as f1:
     data1 = f1.read()
+
+#Creating variables
 accuracy_data = json.loads(data1)
+accuray_term_list = list(accuracy_data.keys())
+accuracy_score_list = []
+
+
+#Creating % value and Avoiding divide by zero
+for i in accuracy_data:
+    if accuracy_data[i][1] > 0:
+        pct = accuracy_data[i][0] / accuracy_data[i][1]
+        accuracy_score_list.append(pct)
+    else:
+        pct = 0.0
+        accuracy_score_list.append(pct)
+         
+#Creating term:accuracy% dictionary        
+terms_dict = {}
+i = 0
+while i < len(accuray_term_list):
+    terms_dict[accuray_term_list[i]] = accuracy_score_list[i]
+    i+=1
+
+#Sorting dictionary + Sorted lists
+new_accuracy_dict = dict(sorted(terms_dict.items(), key=lambda item: item[1]))
+sorted_term_list = list(new_accuracy_dict.keys())
+sorted_score_list = []
+
+#Inverting % score into weight value
+for i in new_accuracy_dict:
+    x = new_accuracy_dict[i]
+    if x < 0.1:
+        x = 0.1
+    new_value = 1 / x
+    sorted_score_list.append(new_value)
 
 #Preparing variables
-results = {"terms": []}
+results = {"terms": [], "score": ''}
 word_list = []
 answer_list = []
-vocab = list(selected_data.keys())
+
+
 
 #Main Loop
 while True:
-    n = random.randrange(0,len(selected_data)) 
-    current_term = vocab[n]
+    #Choosing/Displaying English Term
+    current_term = random.choices(sorted_term_list, weights=sorted_score_list)[0]
     print(current_term)
-
     English_answer = input('''Press enter to show answer:
      ''')
     if English_answer == 'quit':
         break
     print('Answer:', selected_data[current_term][1], '  |||  Pinyin:', selected_data[current_term][0])
     
-    correct_or_incorrect = input('Correct? (y/n) >')
+    while True:
+        correct_or_incorrect = input('Correct? (y/n) >')
+        if correct_or_incorrect == 'y' or correct_or_incorrect == 'n':
+            #we're happy with the value given.
+            #we're ready to exit the loop.
+            break
+        else:
+            print("Please enter a valid response.")
+            continue
+            
+
+    
     if correct_or_incorrect == 'y':
         word_list.append(current_term)
         answer_list.append(True)
@@ -50,23 +88,49 @@ while True:
         word_list.append(current_term)
         answer_list.append(False)
     else:
-        print("I don't understand")
+        print("Unknown Error")
  
     accuracy_data[current_term][1] = accuracy_data[current_term][1] + 1    
-    print('----------------------------')
+    print('------------------------------------')
 
 
-#Creating results
-print('Test complete. Saving results...')
+#Creating saved results
 for i in range(len(word_list)):
     y= word_list[i]
     z= answer_list[i]
     x={y: z}
     results["terms"].append(x)
 
+#Creating End of Test list
+print('------------------------------------')
+print('Test Results:')
+end_test_list = []
+end_test_correct_answers = 0
+i = 0
+while i < len(word_list):
+    if answer_list[i] == True:
+        end_test_list.append(f'{word_list[i]},  :  Correct' )
+        end_test_correct_answers +=1
+    elif answer_list[i] == False:
+        end_test_list.append(f'{word_list[i]},  :  Incorrect' )
+    else:
+        print('Error')
+    i+=1
+  
+
+#Displaying End of test list
+i=0
+while i < len(end_test_list):
+    print(end_test_list[i])
+    i+=1 
+print(f'Total score: {end_test_correct_answers} / {len(end_test_list)}')
+results['score'] = f'Total score: {end_test_correct_answers} / {len(end_test_list)}'
+print('------------------------------------')
+print('Test complete. Saving results...')
+
 #Updating accuracy report
 finished_data = json.dumps(accuracy_data, indent=2)
-with open('C:\\Users\\Joshua\\Desktop\\pyscripts\\flash_cards\\results\\hsk1_accuracy.json', 'w') as f2:
+with open(f'C:\\Users\\Joshua\\Desktop\\pyscripts\\flash_cards\\results\\{hsk_choice}_accuracy.json', 'w') as f2:
     f2.write(finished_data)
 
 #Creating File name
@@ -76,25 +140,6 @@ file_name = stripped_name[0:-6]
 
 #Storing results
 json_string = json.dumps(results, indent=2)
-if hsk_choice == 'hsk1':
-    with open(f'C:\\Users\\Joshua\\Desktop\\pyscripts\\flash_cards\\results\\hsk1_results\\{file_name}{hsk_choice}.json', 'w') as f:
-        f.write(json_string)
-elif hsk_choice == 'hsk2':
-    with open(f'C:\\Users\\Joshua\\Desktop\\pyscripts\\flash_cards\\results\\hsk2_results\\{file_name}{hsk_choice}.json', 'w') as f:
-        f.write(json_string)
-elif hsk_choice == 'hsk3':
-    with open(f'C:\\Users\\Joshua\\Desktop\\pyscripts\\flash_cards\\results\\hsk3_results\\{file_name}{hsk_choice}.json', 'w') as f:
-        f.write(json_string)
-elif hsk_choice == 'hsk4':
-    with open(f'C:\\Users\\Joshua\\Desktop\\pyscripts\\flash_cards\\results\\hsk4_results\\{file_name}{hsk_choice}.json', 'w') as f:
-        f.write(json_string)
-elif hsk_choice == 'hsk5':
-    with open(f'C:\\Users\\Joshua\\Desktop\\pyscripts\\flash_cards\\results\\hsk5_results\\{file_name}{hsk_choice}.json', 'w') as f:
-        f.write(json_string)
-elif hsk_choice == 'hsk6':
-    with open(f'C:\\Users\\Joshua\\Desktop\\pyscripts\\flash_cards\\results\\hsk6_results\\{file_name}{hsk_choice}.json', 'w') as f:
-        f.write(json_string)
-elif hsk_choice == 'hsk789':
-    with open(f'C:\\Users\\Joshua\\Desktop\\pyscripts\\flash_cards\\results\\hsk789_results\\{file_name}{hsk_choice}.json', 'w') as f:
-        f.write(json_string)
-
+with open(f'C:\\Users\\Joshua\\Desktop\\pyscripts\\flash_cards\\results\\{hsk_choice}_results\\{file_name}{hsk_choice}.json', 'w') as f:
+    f.write(json_string)
+ 

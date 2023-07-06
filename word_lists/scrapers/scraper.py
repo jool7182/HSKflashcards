@@ -4,7 +4,7 @@ import pprint
 
 
 #gets html tags, finds <a> tags
-html_text = requests.get('https://mandarinbean.com/new-hsk-6-word-list/').text
+html_text = requests.get('https://mandarinbean.com/new-hsk-5-word-list/').text
 soup = BeautifulSoup(html_text)
 sites = (soup.find_all('tr'))
 

@@ -43,3 +43,5 @@ for i in new:
 
 print(random.choices(sorted_term_list, weights=sorted_score_list, k=15))
 
+
+

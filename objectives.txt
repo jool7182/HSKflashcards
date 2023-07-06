@@ -1,0 +1,11 @@
+CRITICAL TASKS
+#Include example sentences
+
+
+
+ANCILLARY TASKS
+#Make printed characters aligned on the test results
+#Clean up the code by making it more efficient. Get rid of end_of_test variable and just use results
+#Limit the amount of saved results to 10 per test
+#Make a feature that pulls random sentences offline (This should be a separate program)
+#Option to select multiple groups of flash cards
